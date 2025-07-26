@@ -1,0 +1,53 @@
+/* Modern App Styles */
+.app {
+  min-height: 100vh;
+  background: var(--background-color);
+}
+
+/* Custom MUI overrides */
+.MuiButton-root {
+  text-transform: none !important;
+  border-radius: var(--border-radius) !important;
+  font-weight: 500 !important;
+}
+
+.MuiCard-root {
+  border-radius: var(--border-radius-lg) !important;
+  border: 1px solid var(--gray-200) !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+  border-radius: var(--border-radius) !important;
+}
+
+/* Accent highlights */
+.accent-gradient {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+}
+
+.accent-shadow {
+  box-shadow: 0 4px 14px 0 rgba(217, 119, 87, 0.2);
+}
+
+/* Modern loading states */
+.loading-shimmer {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .container {
+    padding: 0 var(--spacing-md);
+  }
+}
