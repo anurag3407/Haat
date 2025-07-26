@@ -12,6 +12,7 @@ import GroupBuys from './pages/GroupBuys';
 import Bidding from './pages/Bidding';
 import Orders from './pages/Orders';
 import Profile from './pages/Profile';
+import { AnimatePresence, motion } from 'framer-motion';
 
 // Create modern theme with new color palette
 const theme = createTheme({
@@ -273,104 +274,162 @@ const theme = createTheme({
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <div>Loading...</div>;
   }
-  
+
   return user ? children : <Navigate to="/login" />;
 };
 
 // Public Route Component (redirect to home if authenticated)
 const PublicRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return <div>Loading...</div>;
   }
-  
+
   return user ? <Navigate to="/" /> : children;
 };
 
 function App() {
+  // Animation variants for page transitions
+  const pageVariants = {
+    initial: { opacity: 0, y: 24 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.4, ease: 'easeOut' } },
+    exit: { opacity: 0, y: -24, transition: { duration: 0.3, ease: 'easeIn' } },
+  };
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AuthProvider>
         <LocationProvider>
           <Router>
-            <Routes>
-              <Route 
-                path="/login" 
-                element={
-                  <PublicRoute>
-                    <Login />
-                  </PublicRoute>
-                } 
-              />
-              <Route 
-                path="/" 
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Home />
-                    </Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/sourcing" 
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <SourcingHub />
-                    </Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/groupbuys" 
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <GroupBuys />
-                    </Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/bidding" 
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Bidding />
-                    </Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/orders" 
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Orders />
-                    </Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/profile" 
-                element={
-                  <ProtectedRoute>
-                    <Layout>
-                      <Profile />
-                    </Layout>
-                  </ProtectedRoute>
-                } 
-              />
-              {/* TODO: Add more protected routes */}
-              <Route path="*" element={<Navigate to="/" />} />
-            </Routes>
+            <AnimatePresence mode="wait">
+              <Routes location={location} key={location.pathname}>
+                <Route
+                  path="/login"
+                  element={
+                    <PublicRoute>
+                      <motion.div
+                        variants={pageVariants}
+                        initial="initial"
+                        animate="animate"
+                        exit="exit"
+                        style={{ minHeight: '100vh' }}
+                      >
+                        <Login />
+                      </motion.div>
+                    </PublicRoute>
+                  }
+                />
+                <Route
+                  path="/"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <motion.div
+                          variants={pageVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                        >
+                          <Home />
+                        </motion.div>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/sourcing"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <motion.div
+                          variants={pageVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                        >
+                          <SourcingHub />
+                        </motion.div>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/groupbuys"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <motion.div
+                          variants={pageVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                        >
+                          <GroupBuys />
+                        </motion.div>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/bidding"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <motion.div
+                          variants={pageVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                        >
+                          <Bidding />
+                        </motion.div>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/orders"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <motion.div
+                          variants={pageVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                        >
+                          <Orders />
+                        </motion.div>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/profile"
+                  element={
+                    <ProtectedRoute>
+                      <Layout>
+                        <motion.div
+                          variants={pageVariants}
+                          initial="initial"
+                          animate="animate"
+                          exit="exit"
+                        >
+                          <Profile />
+                        </motion.div>
+                      </Layout>
+                    </ProtectedRoute>
+                  }
+                />
+                {/* TODO: Add more protected routes */}
+                <Route path="*" element={<Navigate to="/" />} />
+              </Routes>
+            </AnimatePresence>
           </Router>
         </LocationProvider>
       </AuthProvider>
