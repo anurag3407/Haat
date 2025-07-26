@@ -40,6 +40,11 @@ import {
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
+// --- THEME COLORS ---
+const BLUE = '#2A6E9A';
+const GREEN = '#34D399'; // Use Bidding page green
+const shimmerGradient = 'linear-gradient(90deg, transparent, #34D399 40%, #2A6E9A 60%, transparent)';
+
 const GroupBuys = () => {
   const [showConfetti, setShowConfetti] = useState(false);
   const [groupBuys, setGroupBuys] = useState([]);
@@ -223,97 +228,43 @@ const GroupBuys = () => {
         animate="visible"
         whileHover="hover"
         transition={{ delay: index * 0.12 }}
+        style={{ width: '100%' }}
       >
-        <Card sx={{ mb: 2, cursor: 'pointer', boxShadow: 2, borderRadius: 3, transition: 'box-shadow 0.2s' }}>
-          <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-              <Box>
-                <Typography variant="h6" gutterBottom>
-                  {groupBuy.productName}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Organized by {groupBuy.organizer}
-                </Typography>
-                <Chip
-                  label={groupBuy.category}
-                  size="small"
-                  variant="outlined"
-                  sx={{ mt: 1 }}
-                />
-              </Box>
-              <Box textAlign="right">
-                <Chip
-                  label={groupBuy.status === 'completed' ? 'Completed' : 'Active'}
-                  color={groupBuy.status === 'completed' ? 'success' : 'primary'}
-                  size="small"
-                />
-                {groupBuy.status === 'active' && (
-                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                    <Timer fontSize="small" sx={{ mr: 0.5 }} />
-                    {timeLeft}
-                  </Typography>
-                )}
-              </Box>
-            </Box>
-
-            <Box display="flex" alignItems="center" gap={1} mb={2}>
-              <LocationOn fontSize="small" color="action" />
-              <Typography variant="body2" color="text.secondary">
-                {groupBuy.location} • {groupBuy.distance} km away
-              </Typography>
-            </Box>
-
-            <Typography variant="body2" color="text.secondary" mb={2}>
+        <Card sx={{
+          mb: 3,
+          boxShadow: 3,
+          borderRadius: 4,
+          transition: 'box-shadow 0.2s',
+          width: '100%',
+          minHeight: 180,
+          display: 'flex',
+          flexDirection: { xs: 'column', md: 'row' },
+          alignItems: 'stretch',
+          overflow: 'hidden',
+          background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+        }}>
+          {/* Left: Product & Organizer */}
+          <Box sx={{ flex: 2, p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <Typography variant="h5" sx={{ fontWeight: 700, color: BLUE, mb: 0.5 }}>
+              {groupBuy.productName}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ fontWeight: 500 }}>
+              Organized by {groupBuy.organizer}
+            </Typography>
+            <Chip label={groupBuy.category} size="small" sx={{ bgcolor: GREEN, color: '#fff', fontWeight: 600, mt: 1 }} />
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              <LocationOn fontSize="small" sx={{ verticalAlign: 'middle', color: BLUE, mr: 0.5 }} />
+              {groupBuy.location} • {groupBuy.distance} km away
+            </Typography>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
               {groupBuy.description}
             </Typography>
-
-            <Box mb={2}>
-              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-                <Typography variant="body2">
-                  Progress: {groupBuy.currentQuantity}/{groupBuy.targetQuantity} kg
-                </Typography>
-                <Typography variant="body2" color="success.main">
-                  {Math.round(progress)}% complete
-                </Typography>
-              </Box>
-              <Box sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', overflow: 'hidden', position: 'relative' }}>
-                <motion.div
-                  variants={progressVariants}
-                  initial="initial"
-                  animate="animate"
-                  custom={progress}
-                  style={{ height: '100%', background: progress >= 100 ? '#2e7d32' : '#1976d2', borderRadius: 4 }}
-                />
-              </Box>
-            </Box>
-
-            <Grid container spacing={2} mb={2}>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Current Price
-                </Typography>
-                <Typography variant="h6" color="error">
-                  ₹{groupBuy.currentPrice}/kg
-                </Typography>
-              </Grid>
-              <Grid item xs={6}>
-                <Typography variant="body2" color="text.secondary">
-                  Target Price
-                </Typography>
-                <Typography variant="h6" color="success.main">
-                  ₹{groupBuy.targetPrice}/kg
-                </Typography>
-              </Grid>
-            </Grid>
-
-            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-              <Box display="flex" alignItems="center" gap={1}>
-                <People fontSize="small" />
-                <Typography variant="body2">
-                  {groupBuy.participants.length} participants
-                </Typography>
-              </Box>
-              <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: 12 } }}>
+            <Box display="flex" alignItems="center" gap={1} mt={2}>
+              <People fontSize="small" />
+              <Typography variant="body2">
+                {groupBuy.participants.length} participants
+              </Typography>
+              <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 28, height: 28, fontSize: 14 } }}>
                 {groupBuy.participants.map((participant, i) => (
                   <motion.div
                     key={participant.id}
@@ -330,23 +281,63 @@ const GroupBuys = () => {
                 ))}
               </AvatarGroup>
             </Box>
-
-            <Typography variant="body2" color="success.main" fontWeight="bold" mb={2}>
+          </Box>
+          {/* Middle: Progress & Prices */}
+          <Box sx={{ flex: 1.5, p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', justifyContent: 'center', bgcolor: 'rgba(52,211,153,0.10)', borderLeft: { md: `2px solid ${GREEN}` }, minWidth: 220 }}>
+            <Box mb={1}>
+              <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                Progress: {groupBuy.currentQuantity}/{groupBuy.targetQuantity} kg
+              </Typography>
+              <Box sx={{ height: 10, borderRadius: 5, bgcolor: '#F3F4F6', overflow: 'hidden', position: 'relative', mt: 0.5 }}>
+                <motion.div
+                  variants={progressVariants}
+                  initial="initial"
+                  animate="animate"
+                  custom={progress}
+                  style={{ height: '100%', background: progress >= 100 ? '#2e7d32' : `linear-gradient(90deg, ${GREEN} 0%, ${BLUE} 100%)`, borderRadius: 5 }}
+                />
+              </Box>
+            </Box>
+            <Box display="flex" gap={2} alignItems="center" mb={1}>
+              <Box>
+                <Typography variant="body2" color="text.secondary">Current Price</Typography>
+                <Typography variant="h6" sx={{ color: BLUE, fontWeight: 700 }}>
+                  ₹{groupBuy.currentPrice}/kg
+                </Typography>
+              </Box>
+              <Box>
+                <Typography variant="body2" color="text.secondary">Target Price</Typography>
+                <Typography variant="h6" sx={{ color: GREEN, fontWeight: 700 }}>
+                  ₹{groupBuy.targetPrice}/kg
+                </Typography>
+              </Box>
+            </Box>
+            <Typography variant="body2" color='fuchsia' fontWeight="bold" mb={1}>
               Potential Savings: ₹{savings}/kg
             </Typography>
-
-            <Divider sx={{ my: 2 }} />
-
-            <Box display="flex" gap={1}>
+            <Box display="flex" alignItems="center" gap={1}>
+              <Chip label={groupBuy.status === 'completed' ? 'Completed' : 'Active'} color={groupBuy.status === 'completed' ? 'success' : 'primary'} size="small" />
+              {groupBuy.status === 'active' && (
+                <Typography variant="body2" color="error" sx={{ ml: 1 }}>
+                  <Timer fontSize="small" sx={{ mr: 0.5 }} />
+                  {timeLeft}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+          {/* Right: Actions */}
+          <Box sx={{ flex: 1, p: { xs: 2, md: 3 }, display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', minWidth: 180, bgcolor: 'rgba(52,211,153,0.18)', borderLeft: { md: `2px solid ${BLUE}` } }}>
+            <Box display="flex" flexDirection="column" gap={2} width="100%">
               {groupBuy.status === 'active' && progress < 100 && (
                 <Button
                   variant="contained"
-                  size="small"
+                  size="large"
                   fullWidth
                   onClick={() => {
                     setSelectedGroupBuy(groupBuy);
                     setJoinDialogOpen(true);
                   }}
+                  sx={{ borderRadius: 3, fontWeight: 700, bgcolor: `linear-gradient(90deg, ${GREEN} 0%, ${BLUE} 100%)`, color: '#fff', boxShadow: 2 }}
                   component={motion.button}
                   whileHover={{ scale: 1.08 }}
                   whileTap={{ scale: 0.97 }}
@@ -355,15 +346,15 @@ const GroupBuys = () => {
                 </Button>
               )}
               {groupBuy.status === 'completed' && (
-                <Button variant="outlined" size="small" fullWidth component={motion.button} whileHover={{ scale: 1.05 }}>
+                <Button variant="outlined" size="large" fullWidth sx={{ borderRadius: 3, fontWeight: 700, color: BLUE, borderColor: BLUE }} component={motion.button} whileHover={{ scale: 1.05 }}>
                   View Details
                 </Button>
               )}
-              <IconButton size="small" component={motion.button} whileHover={{ scale: 1.2 }}>
+              <IconButton size="large" sx={{ bgcolor: '#F3F4F6', borderRadius: 2, boxShadow: 1, color: BLUE }} component={motion.button} whileHover={{ scale: 1.2 }}>
                 <Share />
               </IconButton>
             </Box>
-          </CardContent>
+          </Box>
         </Card>
       </motion.div>
     );
@@ -421,6 +412,7 @@ const GroupBuys = () => {
     );
   };
 
+
   const handleFieldChange = React.useCallback((field) => (e) => {
     setNewGroupBuy((prev) => ({ ...prev, [field]: e.target.value }));
   }, []);
@@ -441,7 +433,7 @@ const GroupBuys = () => {
             transition: { duration: 0.3 }
           }}
         >
-          <DialogTitle>Create New Group Buy</DialogTitle>
+          <DialogTitle>Create New Group Buy</DialogTitle>H
           <DialogContent>
             <Grid container spacing={2} sx={{ mt: 1 }}>
               <Grid item xs={12} md={6}>
@@ -552,14 +544,22 @@ const GroupBuys = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: index * 0.1 }}
-          style={{ marginBottom: 16 }}
+          style={{ marginBottom: 24, width: '100%' }}
         >
           <Card sx={{ 
-            '&:hover': { elevation: 4 },
+            width: '100%',
+            minHeight: 180,
+            boxShadow: 3,
+            borderRadius: 4,
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'stretch',
+            transition: 'box-shadow 0.2s',
+            background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
           }}>
-            <CardContent>
+            <CardContent sx={{ width: '100%' }}>
               {/* Header skeleton */}
               <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
                 <Box flex={1}>
@@ -584,7 +584,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -609,7 +609,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -633,7 +633,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -660,7 +660,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -684,7 +684,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -713,7 +713,7 @@ const GroupBuys = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -737,7 +737,7 @@ const GroupBuys = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -765,7 +765,7 @@ const GroupBuys = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    background: shimmerGradient,
                   }}
                 />
               </Box>
@@ -793,7 +793,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -817,7 +817,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -842,7 +842,7 @@ const GroupBuys = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -872,7 +872,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -896,7 +896,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -923,7 +923,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -947,7 +947,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -977,7 +977,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -1001,7 +1001,7 @@ const GroupBuys = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -1029,7 +1029,7 @@ const GroupBuys = () => {
                           left: 0,
                           right: 0,
                           bottom: 0,
-                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                          background: shimmerGradient,
                         }}
                       />
                     </Box>
@@ -1059,7 +1059,7 @@ const GroupBuys = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -1083,7 +1083,7 @@ const GroupBuys = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -1096,98 +1096,156 @@ const GroupBuys = () => {
   );
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 2 }}>
-      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={250} />}
-      <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
-        <Box>
-          <Typography variant="h4" gutterBottom component={motion.h4} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
-            Group Buys
-          </Typography>
-          <Typography variant="body1" color="text.secondary" component={motion.p} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
-            Join bulk purchases to get better prices
-          </Typography>
-        </Box>
+    <motion.div
+      initial={{ opacity: 0, y: 32 }}
+      animate={{ opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } }}
+      exit={{ opacity: 0, y: -32, transition: { duration: 0.4, ease: 'easeIn' } }}
+      style={{ minHeight: '100vh', background: `linear-gradient(120deg, #E6FFF7 0%, ${GREEN} 100%)` }}
+    >
+      <Container maxWidth="lg" sx={{ pt: { xs: 2, md: 6 }, pb: 4 }}>
+        {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={250} />}
+        {/* Hero Section */}
         <motion.div
-          initial={{ scale: 1 }}
-          animate={{ scale: [1, 1.08, 1] }}
-          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+          initial={{ opacity: 0, y: 32 }}
+          animate={{ opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } }}
+          style={{ marginBottom: 40 }}
         >
-          <Button
-            variant="contained"
-            startIcon={<Add />}
-            onClick={() => setCreateDialogOpen(true)}
-            sx={{ boxShadow: 3 }}
-            component={motion.button}
-            whileHover={{ scale: 1.12 }}
-            whileTap={{ scale: 0.97 }}
-          >
-            Create Group Buy
-          </Button>
+          <Paper elevation={4} sx={{
+            p: { xs: 3, md: 5 },
+            borderRadius: 4,
+            background: `linear-gradient(135deg, ${BLUE} 0%, ${GREEN} 100%)`,
+            color: '#fff',
+            mb: 2,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <Box sx={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.15, zIndex: 0 }}>
+              <img src="https://cdn.pixabay.com/photo/2017/01/06/19/15/food-1957680_1280.png" alt="Street Food" style={{ width: 220, maxWidth: '40vw' }} />
+            </Box>
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, letterSpacing: 1 }}>
+                Group Buys
+              </Typography>
+              <Typography variant="h5" sx={{ mb: 2, fontWeight: 500 }}>
+                Join bulk purchases to get better prices, save more, and build your vendor community.
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2, fontWeight: 400 }}>
+                <strong>“Collaborate, buy together, and unlock exclusive deals for your business.”</strong>
+              </Typography>
+            </Box>
+            <motion.div
+              initial={{ scale: 1 }}
+              animate={{ scale: [1, 1.08, 1] }}
+              transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+              style={{ position: 'absolute', top: 24, right: 32, zIndex: 2 }}
+            >
+              <Button
+                variant="contained"
+                startIcon={<Add />}
+                onClick={() => setCreateDialogOpen(true)}
+                sx={{ boxShadow: 3, borderRadius: 3, bgcolor: `linear-gradient(90deg, ${GREEN} 0%, ${BLUE} 100%)`, color: '#fff', fontWeight: 700 }}
+                component={motion.button}
+                whileHover={{ scale: 1.12 }}
+                whileTap={{ scale: 0.97 }}
+              >
+                Create Group Buy
+              </Button>
+            </motion.div>
+          </Paper>
         </motion.div>
-      </Box>
-
-      {/* Stats */}
-      <Grid container spacing={2} mb={3}>
-        <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
-            <Typography variant="h4" color="primary">
-              <CountUp end={groupBuys.filter(gb => gb.status === 'active').length} duration={1.2} />
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Active Group Buys
-            </Typography>
-          </Paper>
+        {/* Stats */}
+        <Grid container spacing={2} mb={3}>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: '#2A6E9A',
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                <CountUp end={groupBuys.filter(gb => gb.status === 'active').length} duration={1.2} />
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Active Group Buys
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: '#2A6E9A',
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                <CountUp end={2340} duration={1.2} prefix="₹" />
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Total Savings
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: '#2A6E9A',
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                <CountUp end={24} duration={1.2} />
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Joined Groups
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: '#2A6E9A',
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                <CountUp end={12} duration={1.2} />
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Completed
+              </Typography>
+            </Paper>
+          </Grid>
         </Grid>
-        <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
-            <Typography variant="h4" color="success.main">
-              <CountUp end={2340} duration={1.2} prefix="₹" />
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Total Savings
-            </Typography>
-          </Paper>
+        {/* Group Buys List */}
+        <Grid container spacing={2}>
+          <Grid item xs={12}>
+            {loading ? (
+              <LoadingSkeleton />
+            ) : (
+              <AnimatePresence>
+                {groupBuys.map((groupBuy, idx) => (
+                  <GroupBuyCard key={groupBuy.id} groupBuy={groupBuy} index={idx} />
+                ))}
+              </AnimatePresence>
+            )}
+          </Grid>
         </Grid>
-        <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
-            <Typography variant="h4" color="warning.main">
-              <CountUp end={24} duration={1.2} />
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Joined Groups
-            </Typography>
-          </Paper>
-        </Grid>
-        <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
-            <Typography variant="h4" color="info.main">
-              <CountUp end={12} duration={1.2} />
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              Completed
-            </Typography>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* Group Buys List */}
-      <Grid container spacing={2}>
-        <Grid item xs={12}>
-          {loading ? (
-            <LoadingSkeleton />
-          ) : (
-            <AnimatePresence>
-              {groupBuys.map((groupBuy, idx) => (
-                <GroupBuyCard key={groupBuy.id} groupBuy={groupBuy} index={idx} />
-              ))}
-            </AnimatePresence>
-          )}
-        </Grid>
-      </Grid>
-
-      {MemoCreateDialog}
-      <JoinDialog />
-    </Container>
+        {MemoCreateDialog}
+        <JoinDialog />
+      </Container>
+    </motion.div>
   );
 };
 

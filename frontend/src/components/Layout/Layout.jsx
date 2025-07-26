@@ -63,11 +63,13 @@ const Layout = ({ children }) => {
       {/* Modern App Bar */}
       <AppBar 
         position="fixed" 
-        sx={{ 
+        sx={{
           zIndex: (theme) => theme.zIndex.drawer + 1,
-          background: 'linear-gradient(135deg, #2A6E9A 0%, #1E5A7A 100%)',
-          boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
-          backdropFilter: 'blur(10px)',
+          background: 'linear-gradient(120deg, #2A6E9A 0%, #A7D8F0 100%)',
+          boxShadow: '0 8px 32px -4px rgba(42,110,154,0.18)',
+          backdropFilter: 'blur(16px)',
+          borderBottom: '1.5px solid rgba(167,216,240,0.18)',
+          transition: 'background 0.4s',
         }}
       >
         <Toolbar>
@@ -87,41 +89,59 @@ const Layout = ({ children }) => {
           </IconButton>
           
           <Typography 
-            variant="h6" 
-            component="div" 
-            sx={{ 
+            variant="h6"
+            component="div"
+            onClick={() => navigate('/')}
+            sx={{
               flexGrow: 1,
-              fontWeight: 700,
-              fontSize: '1.5rem',
-              background: 'linear-gradient(135deg, #FFFFFF 0%, #F0F8FF 100%)',
+              fontWeight: 800,
+              fontSize: '2rem',
+              letterSpacing: 1,
+              background: 'linear-gradient(90deg, #A7D8F0 0%, #2A6E9A 100%)',
               backgroundClip: 'text',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
+              textShadow: '0 2px 12px #A7D8F0',
+              filter: 'drop-shadow(0 2px 8px #2A6E9A22)',
+              transition: 'font-size 0.2s',
+              cursor: 'pointer',
+              userSelect: 'none',
+              '&:hover': {
+                opacity: 0.85,
+                textShadow: '0 4px 16px #A7D8F0',
+              },
             }}
           >
             Haat B2B
           </Typography>
 
           {/* Location Display */}
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
               mr: 2,
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: 2,
               px: 1.5,
               py: 0.5,
+              borderRadius: 3,
+              background: 'rgba(255,255,255,0.25)',
+              boxShadow: '0 2px 8px rgba(42,110,154,0.08)',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255,255,255,0.18)',
+              minWidth: 120,
+              transition: 'background 0.3s',
             }}
           >
-            <LocationIcon sx={{ mr: 1, fontSize: 16 }} />
-            <Typography 
-              variant="body2" 
-              sx={{ 
-                maxWidth: 120, 
-                overflow: 'hidden', 
+            <LocationIcon sx={{ mr: 1, fontSize: 18, color: '#2A6E9A' }} />
+            <Typography
+              variant="body2"
+              sx={{
+                maxWidth: 120,
+                overflow: 'hidden',
                 textOverflow: 'ellipsis',
-                fontWeight: 500,
+                fontWeight: 600,
+                color: '#2A6E9A',
+                letterSpacing: 0.5,
               }}
             >
               {address?.area || 'Set Location'}
@@ -129,42 +149,50 @@ const Layout = ({ children }) => {
           </Box>
 
           {/* Notifications */}
-          <IconButton 
-            color="inherit" 
-            sx={{ 
+          <IconButton
+            color="inherit"
+            sx={{
               mr: 1,
+              background: 'rgba(255,255,255,0.18)',
+              borderRadius: 2,
+              boxShadow: '0 2px 8px rgba(42,110,154,0.08)',
+              backdropFilter: 'blur(6px)',
               '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                background: 'rgba(255,255,255,0.32)',
               },
+              transition: 'background 0.3s',
             }}
           >
-            <Badge 
-              badgeContent={3} 
+            <Badge
+              badgeContent={3}
               sx={{
                 '& .MuiBadge-badge': {
-                  backgroundColor: '#D97757',
+                  background: 'linear-gradient(135deg, #A7D8F0 0%, #2A6E9A 100%)',
                   color: 'white',
+                  boxShadow: '0 2px 8px #A7D8F044',
                 },
               }}
             >
-              <NotificationsIcon />
+              <NotificationsIcon sx={{ color: '#2A6E9A' }} />
             </Badge>
           </IconButton>
 
           {/* User Avatar */}
-          <Avatar 
-            sx={{ 
-              width: 40, 
-              height: 40, 
-              bgcolor: '#D97757',
-              fontWeight: 600,
-              fontSize: '0.875rem',
-              border: '2px solid rgba(255, 255, 255, 0.2)',
+          <Avatar
+            sx={{
+              width: 44,
+              height: 44,
+              bgcolor: 'linear-gradient(135deg, #A7D8F0 0%, #2A6E9A 100%)',
+              color: '#fff',
+              fontWeight: 700,
+              fontSize: '1.1rem',
+              border: '2.5px solid rgba(167,216,240,0.22)',
+              boxShadow: '0 2px 8px #2A6E9A22',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               '&:hover': {
-                transform: 'scale(1.05)',
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.2)',
+                transform: 'scale(1.08)',
+                boxShadow: '0 8px 24px #A7D8F044',
               },
             }}
             onClick={() => navigate('/profile')}
@@ -216,7 +244,7 @@ const Layout = ({ children }) => {
           pt: 8,
           pb: 2,
           px: 2,
-          backgroundColor: '#f5f5f5',
+          background: 'linear-gradient(120deg, #E5F3FF 0%, #A7D8F0 100%)',
           minHeight: 'calc(100vh - 64px)',
         }}
       >

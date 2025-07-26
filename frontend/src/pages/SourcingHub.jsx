@@ -35,6 +35,11 @@ import {
 import { useLocation } from '../contexts/LocationContext';
 import { motion, AnimatePresence } from 'framer-motion';
 
+// --- THEME COLORS ---
+const BLUE = '#2A6E9A';
+const GREEN = '#34D399';
+const shimmerGradient = 'linear-gradient(90deg, transparent, #34D399 40%, #2A6E9A 60%, transparent)';
+
 const SourcingHub = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('');
@@ -52,7 +57,6 @@ const SourcingHub = () => {
     'Dairy Products',
     'Spices',
     'Snacks',
-    'Beverages',
     'Others'
   ];
 
@@ -212,10 +216,12 @@ const SourcingHub = () => {
           variants={fadeSlideUp}
           style={{ marginBottom: 16 }}
         >
-          <Card sx={{ 
-            '&:hover': { elevation: 4 },
+          <Card sx={{
             position: 'relative',
-            overflow: 'hidden'
+            overflow: 'hidden',
+            borderRadius: 4,
+            background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+            boxShadow: 3,
           }}>
             <CardContent>
               {/* Header skeleton */}
@@ -241,7 +247,7 @@ const SourcingHub = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -267,7 +273,7 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -292,7 +298,7 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -319,7 +325,7 @@ const SourcingHub = () => {
                             left: 0,
                             right: 0,
                             bottom: 0,
-                            background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                            background: shimmerGradient,
                           }}
                         />
                       </Box>
@@ -346,12 +352,11 @@ const SourcingHub = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
               </Box>
-
               {/* Address skeleton */}
               <Box
                 sx={{
@@ -374,11 +379,10 @@ const SourcingHub = () => {
                     left: 0,
                     right: 0,
                     bottom: 0,
-                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    background: shimmerGradient,
                   }}
                 />
               </Box>
-
               {/* Categories skeleton */}
               <Box display="flex" flexWrap="wrap" gap={1} mb={2}>
                 {[...Array(3)].map((_, i) => (
@@ -403,15 +407,13 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
                 ))}
               </Box>
-
               <Divider sx={{ my: 2 }} />
-
               {/* Grid skeleton */}
               <Grid container spacing={2} mb={2}>
                 <Grid item xs={6}>
@@ -436,7 +438,7 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -460,7 +462,7 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -487,7 +489,7 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
@@ -511,13 +513,12 @@ const SourcingHub = () => {
                         left: 0,
                         right: 0,
                         bottom: 0,
-                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        background: shimmerGradient,
                       }}
                     />
                   </Box>
                 </Grid>
               </Grid>
-
               {/* Buttons skeleton */}
               <Box display="flex" gap={1} mt={2}>
                 <Box
@@ -540,7 +541,7 @@ const SourcingHub = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -564,7 +565,7 @@ const SourcingHub = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -588,7 +589,7 @@ const SourcingHub = () => {
                       left: 0,
                       right: 0,
                       bottom: 0,
-                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      background: shimmerGradient,
                     }}
                   />
                 </Box>
@@ -786,22 +787,116 @@ const SourcingHub = () => {
       initial={{ opacity: 0, y: 32 }}
       animate={{ opacity: 1, y: 0, transition: { duration: 0.7, ease: 'easeOut' } }}
       exit={{ opacity: 0, y: -32, transition: { duration: 0.4, ease: 'easeIn' } }}
+      style={{ minHeight: '100vh', background: `linear-gradient(120deg, #E6FFF7 0%, ${GREEN} 100%)` }}
     >
-      <Container maxWidth="lg" sx={{ mt: 2 }}>
-        {/* Header */}
+      <Container maxWidth="lg" sx={{ pt: { xs: 2, md: 6 }, pb: 4 }}>
+        {/* Hero Section */}
         <motion.div
           variants={fadeSlideUp}
           initial="initial"
           animate="animate"
+          style={{ marginBottom: 40 }}
         >
-          <Typography variant="h4" gutterBottom>
-            Sourcing Hub
-          </Typography>
-          <Typography variant="body1" color="text.secondary" mb={3}>
-            Find suppliers and products near {address?.area || 'your location'}
-          </Typography>
+          <Paper elevation={4} sx={{
+            p: { xs: 3, md: 5 },
+            borderRadius: 4,
+            background: `linear-gradient(135deg, ${BLUE} 0%, ${GREEN} 100%)`,
+            color: '#fff',
+            mb: 2,
+            position: 'relative',
+            overflow: 'hidden',
+          }}>
+            <Box sx={{ position: 'absolute', right: 0, bottom: 0, opacity: 0.15, zIndex: 0 }}>
+              <img src="https://cdn.pixabay.com/photo/2017/01/06/19/15/food-1957680_1280.png" alt="Street Food" style={{ width: 220, maxWidth: '40vw' }} />
+            </Box>
+            <Box sx={{ position: 'relative', zIndex: 1 }}>
+              <Typography variant="h3" sx={{ fontWeight: 700, mb: 1, letterSpacing: 1 }}>
+                Sourcing Hub
+              </Typography>
+              <Typography variant="h5" sx={{ mb: 2, fontWeight: 500 }}>
+                Discover trusted suppliers and products. Source directly, save more, and avoid middlemen.
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2, fontWeight: 400 }}>
+                <strong>“Get fresh produce, fair prices, and connect with suppliers who care about your business.”</strong>
+              </Typography>
+            </Box>
+          </Paper>
         </motion.div>
-
+        {/* Stats Section (like GroupBuys) */}
+        <Grid container spacing={2} mb={3}>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: BLUE,
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                {suppliers.length}
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Suppliers
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: BLUE,
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                {products.length}
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Products
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: BLUE,
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                {categories.length}
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Categories
+              </Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={6} md={3}>
+            <Paper sx={{
+              p: 2,
+              textAlign: 'center',
+              borderRadius: 3,
+              background: `linear-gradient(120deg, #E6FFF7 0%, ${BLUE} 100%)`,
+              color: BLUE,
+              boxShadow: 2,
+              border: `1px solid ${GREEN}`,
+            }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
+              <Typography variant="h4" sx={{ color: BLUE, fontWeight: 700 }}>
+                {suppliers.reduce((acc, s) => acc + s.trustScore, 0)}
+              </Typography>
+              <Typography variant="body2" sx={{ color: BLUE, fontWeight: 500 }}>
+                Trust Score Sum
+              </Typography>
+            </Paper>
+          </Grid>
+        </Grid>
         {/* Search and Filter */}
         <motion.div
           variants={containerStagger}
@@ -821,7 +916,6 @@ const SourcingHub = () => {
                 sx={{ mb: 2 }}
               />
             </motion.div>
-            
             <motion.div variants={fadeSlideLeft}>
               <FormControl sx={{ minWidth: 150 }}>
                 <InputLabel>Category</InputLabel>
@@ -839,7 +933,6 @@ const SourcingHub = () => {
             </motion.div>
           </Box>
         </motion.div>
-
         {/* Tabs */}
         <motion.div
           variants={fadeSlideUp}
@@ -873,7 +966,6 @@ const SourcingHub = () => {
             </motion.div>
           </Box>
         </motion.div>
-
         {/* Content */}
         <motion.div
           key={activeTab}
@@ -884,7 +976,6 @@ const SourcingHub = () => {
           <Typography variant="h6" gutterBottom>
             {activeTab === 'suppliers' ? 'Nearby Suppliers' : 'Available Products'}
           </Typography>
-          
           {loading ? (
             <LoadingSkeleton />
           ) : (
@@ -897,7 +988,6 @@ const SourcingHub = () => {
                 suppliers.map((supplier) => (
                   <SupplierCard key={supplier.id} supplier={supplier} />
                 ))}
-              
               {activeTab === 'products' &&
                 products.map((product) => (
                   <ProductCard key={product.id} product={product} />
