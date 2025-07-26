@@ -23,7 +23,10 @@ import {
   Paper,
   Divider,
   IconButton,
+  InputAdornment
 } from '@mui/material';
+import CountUp from 'react-countup';
+import Confetti from 'react-confetti';
 import {
   Add,
   Group,
@@ -34,9 +37,11 @@ import {
   People,
   ShoppingCart,
 } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
 const GroupBuys = () => {
+  const [showConfetti, setShowConfetti] = useState(false);
   const [groupBuys, setGroupBuys] = useState([]);
   const [loading, setLoading] = useState(false);
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
@@ -156,6 +161,8 @@ const GroupBuys = () => {
       deadline: '',
       description: '',
     });
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
     loadGroupBuys();
   };
 
@@ -164,6 +171,8 @@ const GroupBuys = () => {
     console.log('Joining group buy:', selectedGroupBuy.id, 'with quantity:', quantity);
     setJoinDialogOpen(false);
     setSelectedGroupBuy(null);
+    setShowConfetti(true);
+    setTimeout(() => setShowConfetti(false), 2000);
     loadGroupBuys();
   };
 
@@ -185,138 +194,178 @@ const GroupBuys = () => {
     return `${hours}h ${minutes}m`;
   };
 
-  const GroupBuyCard = ({ groupBuy }) => {
+  // Animation variants
+  const cardVariants = {
+    hidden: { opacity: 0, y: 40, scale: 0.95 },
+    visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 120, damping: 18 } },
+    hover: { scale: 1.03, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: { duration: 0.2 } }
+  };
+
+  const avatarVariants = {
+    hidden: { opacity: 0, scale: 0.7 },
+    visible: (i) => ({ opacity: 1, scale: 1, transition: { delay: i * 0.1 } })
+  };
+
+  const progressVariants = {
+    initial: { width: 0 },
+    animate: (progress) => ({ width: `${Math.min(progress, 100)}%`, transition: { duration: 1.2, ease: 'easeOut' } })
+  };
+
+  const GroupBuyCard = ({ groupBuy, index }) => {
     const progress = (groupBuy.currentQuantity / groupBuy.targetQuantity) * 100;
     const savings = groupBuy.currentPrice - groupBuy.targetPrice;
     const timeLeft = getTimeRemaining(groupBuy.deadline);
-    
+
     return (
-      <Card sx={{ mb: 2, '&:hover': { elevation: 4 } }}>
-        <CardContent>
-          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-            <Box>
-              <Typography variant="h6" gutterBottom>
-                {groupBuy.productName}
-              </Typography>
-              <Typography variant="body2" color="text.secondary">
-                Organized by {groupBuy.organizer}
-              </Typography>
-              <Chip
-                label={groupBuy.category}
-                size="small"
-                variant="outlined"
-                sx={{ mt: 1 }}
-              />
-            </Box>
-            <Box textAlign="right">
-              <Chip
-                label={groupBuy.status === 'completed' ? 'Completed' : 'Active'}
-                color={groupBuy.status === 'completed' ? 'success' : 'primary'}
-                size="small"
-              />
-              {groupBuy.status === 'active' && (
-                <Typography variant="body2" color="error" sx={{ mt: 1 }}>
-                  <Timer fontSize="small" sx={{ mr: 0.5 }} />
-                  {timeLeft}
+      <motion.div
+        variants={cardVariants}
+        initial="hidden"
+        animate="visible"
+        whileHover="hover"
+        transition={{ delay: index * 0.12 }}
+      >
+        <Card sx={{ mb: 2, cursor: 'pointer', boxShadow: 2, borderRadius: 3, transition: 'box-shadow 0.2s' }}>
+          <CardContent>
+            <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+              <Box>
+                <Typography variant="h6" gutterBottom>
+                  {groupBuy.productName}
                 </Typography>
-              )}
+                <Typography variant="body2" color="text.secondary">
+                  Organized by {groupBuy.organizer}
+                </Typography>
+                <Chip
+                  label={groupBuy.category}
+                  size="small"
+                  variant="outlined"
+                  sx={{ mt: 1 }}
+                />
+              </Box>
+              <Box textAlign="right">
+                <Chip
+                  label={groupBuy.status === 'completed' ? 'Completed' : 'Active'}
+                  color={groupBuy.status === 'completed' ? 'success' : 'primary'}
+                  size="small"
+                />
+                {groupBuy.status === 'active' && (
+                  <Typography variant="body2" color="error" sx={{ mt: 1 }}>
+                    <Timer fontSize="small" sx={{ mr: 0.5 }} />
+                    {timeLeft}
+                  </Typography>
+                )}
+              </Box>
             </Box>
-          </Box>
 
-          <Box display="flex" alignItems="center" gap={1} mb={2}>
-            <LocationOn fontSize="small" color="action" />
-            <Typography variant="body2" color="text.secondary">
-              {groupBuy.location} • {groupBuy.distance} km away
+            <Box display="flex" alignItems="center" gap={1} mb={2}>
+              <LocationOn fontSize="small" color="action" />
+              <Typography variant="body2" color="text.secondary">
+                {groupBuy.location} • {groupBuy.distance} km away
+              </Typography>
+            </Box>
+
+            <Typography variant="body2" color="text.secondary" mb={2}>
+              {groupBuy.description}
             </Typography>
-          </Box>
 
-          <Typography variant="body2" color="text.secondary" mb={2}>
-            {groupBuy.description}
-          </Typography>
-
-          <Box mb={2}>
-            <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
-              <Typography variant="body2">
-                Progress: {groupBuy.currentQuantity}/{groupBuy.targetQuantity} kg
-              </Typography>
-              <Typography variant="body2" color="success.main">
-                {Math.round(progress)}% complete
-              </Typography>
+            <Box mb={2}>
+              <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                <Typography variant="body2">
+                  Progress: {groupBuy.currentQuantity}/{groupBuy.targetQuantity} kg
+                </Typography>
+                <Typography variant="body2" color="success.main">
+                  {Math.round(progress)}% complete
+                </Typography>
+              </Box>
+              <Box sx={{ height: 8, borderRadius: 4, bgcolor: 'grey.200', overflow: 'hidden', position: 'relative' }}>
+                <motion.div
+                  variants={progressVariants}
+                  initial="initial"
+                  animate="animate"
+                  custom={progress}
+                  style={{ height: '100%', background: progress >= 100 ? '#2e7d32' : '#1976d2', borderRadius: 4 }}
+                />
+              </Box>
             </Box>
-            <LinearProgress
-              variant="determinate"
-              value={Math.min(progress, 100)}
-              sx={{ height: 8, borderRadius: 4 }}
-              color={progress >= 100 ? 'success' : 'primary'}
-            />
-          </Box>
 
-          <Grid container spacing={2} mb={2}>
-            <Grid item xs={6}>
-              <Typography variant="body2" color="text.secondary">
-                Current Price
-              </Typography>
-              <Typography variant="h6" color="error">
-                ₹{groupBuy.currentPrice}/kg
-              </Typography>
+            <Grid container spacing={2} mb={2}>
+              <Grid item xs={6}>
+                <Typography variant="body2" color="text.secondary">
+                  Current Price
+                </Typography>
+                <Typography variant="h6" color="error">
+                  ₹{groupBuy.currentPrice}/kg
+                </Typography>
+              </Grid>
+              <Grid item xs={6}>
+                <Typography variant="body2" color="text.secondary">
+                  Target Price
+                </Typography>
+                <Typography variant="h6" color="success.main">
+                  ₹{groupBuy.targetPrice}/kg
+                </Typography>
+              </Grid>
             </Grid>
-            <Grid item xs={6}>
-              <Typography variant="body2" color="text.secondary">
-                Target Price
-              </Typography>
-              <Typography variant="h6" color="success.main">
-                ₹{groupBuy.targetPrice}/kg
-              </Typography>
-            </Grid>
-          </Grid>
 
-          <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
-            <Box display="flex" alignItems="center" gap={1}>
-              <People fontSize="small" />
-              <Typography variant="body2">
-                {groupBuy.participants.length} participants
-              </Typography>
+            <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <People fontSize="small" />
+                <Typography variant="body2">
+                  {groupBuy.participants.length} participants
+                </Typography>
+              </Box>
+              <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: 12 } }}>
+                {groupBuy.participants.map((participant, i) => (
+                  <motion.div
+                    key={participant.id}
+                    variants={avatarVariants}
+                    initial="hidden"
+                    animate="visible"
+                    custom={i}
+                    style={{ display: 'inline-block' }}
+                  >
+                    <Avatar>
+                      {participant.name.charAt(0)}
+                    </Avatar>
+                  </motion.div>
+                ))}
+              </AvatarGroup>
             </Box>
-            <AvatarGroup max={4} sx={{ '& .MuiAvatar-root': { width: 24, height: 24, fontSize: 12 } }}>
-              {groupBuy.participants.map((participant) => (
-                <Avatar key={participant.id}>
-                  {participant.name.charAt(0)}
-                </Avatar>
-              ))}
-            </AvatarGroup>
-          </Box>
 
-          <Typography variant="body2" color="success.main" fontWeight="bold" mb={2}>
-            Potential Savings: ₹{savings}/kg
-          </Typography>
+            <Typography variant="body2" color="success.main" fontWeight="bold" mb={2}>
+              Potential Savings: ₹{savings}/kg
+            </Typography>
 
-          <Divider sx={{ my: 2 }} />
+            <Divider sx={{ my: 2 }} />
 
-          <Box display="flex" gap={1}>
-            {groupBuy.status === 'active' && progress < 100 && (
-              <Button
-                variant="contained"
-                size="small"
-                fullWidth
-                onClick={() => {
-                  setSelectedGroupBuy(groupBuy);
-                  setJoinDialogOpen(true);
-                }}
-              >
-                Join Group Buy
-              </Button>
-            )}
-            {groupBuy.status === 'completed' && (
-              <Button variant="outlined" size="small" fullWidth>
-                View Details
-              </Button>
-            )}
-            <IconButton size="small">
-              <Share />
-            </IconButton>
-          </Box>
-        </CardContent>
-      </Card>
+            <Box display="flex" gap={1}>
+              {groupBuy.status === 'active' && progress < 100 && (
+                <Button
+                  variant="contained"
+                  size="small"
+                  fullWidth
+                  onClick={() => {
+                    setSelectedGroupBuy(groupBuy);
+                    setJoinDialogOpen(true);
+                  }}
+                  component={motion.button}
+                  whileHover={{ scale: 1.08 }}
+                  whileTap={{ scale: 0.97 }}
+                >
+                  Join Group Buy
+                </Button>
+              )}
+              {groupBuy.status === 'completed' && (
+                <Button variant="outlined" size="small" fullWidth component={motion.button} whileHover={{ scale: 1.05 }}>
+                  View Details
+                </Button>
+              )}
+              <IconButton size="small" component={motion.button} whileHover={{ scale: 1.2 }}>
+                <Share />
+              </IconButton>
+            </Box>
+          </CardContent>
+        </Card>
+      </motion.div>
     );
   };
 
@@ -324,147 +373,765 @@ const GroupBuys = () => {
     const [quantity, setQuantity] = useState('');
     
     return (
-      <Dialog open={joinDialogOpen} onClose={() => setJoinDialogOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Join Group Buy</DialogTitle>
-        <DialogContent>
-          <Typography variant="body1" mb={2}>
-            {selectedGroupBuy?.productName} - ₹{selectedGroupBuy?.targetPrice}/kg
-          </Typography>
-          <TextField
+      <AnimatePresence>
+        {joinDialogOpen && (
+          <Dialog
+            open={joinDialogOpen}
+            onClose={() => setJoinDialogOpen(false)}
+            maxWidth="sm"
             fullWidth
-            label="Quantity (kg)"
-            type="number"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            sx={{ mt: 2 }}
-            helperText={`Remaining: ${selectedGroupBuy?.targetQuantity - selectedGroupBuy?.currentQuantity} kg`}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setJoinDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={() => handleJoinGroupBuy(quantity)}
-            variant="contained"
-            disabled={!quantity || quantity <= 0}
+            PaperProps={{
+              component: motion.div,
+              initial: { opacity: 0, scale: 0.8 },
+              animate: { opacity: 1, scale: 1 },
+              exit: { opacity: 0, scale: 0.8 },
+              transition: { duration: 0.3 }
+            }}
           >
-            Join
-          </Button>
-        </DialogActions>
-      </Dialog>
+            <DialogTitle>Join Group Buy</DialogTitle>
+            <DialogContent>
+              <Typography variant="body1" mb={2}>
+                {selectedGroupBuy?.productName} - ₹{selectedGroupBuy?.targetPrice}/kg
+              </Typography>
+              <TextField
+                fullWidth
+                label="Quantity (kg)"
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                sx={{ mt: 2 }}
+                helperText={`Remaining: ${selectedGroupBuy?.targetQuantity - selectedGroupBuy?.currentQuantity} kg`}
+              />
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={() => setJoinDialogOpen(false)} component={motion.button} whileTap={{ scale: 0.95 }}>Cancel</Button>
+              <Button
+                onClick={() => handleJoinGroupBuy(quantity)}
+                variant="contained"
+                disabled={!quantity || quantity <= 0}
+                component={motion.button}
+                whileTap={{ scale: 0.95 }}
+              >
+                Join
+              </Button>
+            </DialogActions>
+          </Dialog>
+        )}
+      </AnimatePresence>
     );
   };
 
-  const CreateDialog = () => (
-    <Dialog open={createDialogOpen} onClose={() => setCreateDialogOpen(false)} maxWidth="md" fullWidth>
-      <DialogTitle>Create New Group Buy</DialogTitle>
-      <DialogContent>
-        <Grid container spacing={2} sx={{ mt: 1 }}>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Product Name"
-              value={newGroupBuy.productName}
-              onChange={(e) => setNewGroupBuy({ ...newGroupBuy, productName: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <FormControl fullWidth>
-              <InputLabel>Category</InputLabel>
-              <Select
-                value={newGroupBuy.category}
-                onChange={(e) => setNewGroupBuy({ ...newGroupBuy, category: e.target.value })}
-                label="Category"
+  const handleFieldChange = React.useCallback((field) => (e) => {
+    setNewGroupBuy((prev) => ({ ...prev, [field]: e.target.value }));
+  }, []);
+
+  const MemoCreateDialog = React.useMemo(() => (
+    <AnimatePresence>
+      {createDialogOpen && (
+        <Dialog
+          open={createDialogOpen}
+          onClose={() => setCreateDialogOpen(false)}
+          maxWidth="md"
+          fullWidth
+          PaperProps={{
+            component: motion.div,
+            initial: { opacity: 0, scale: 0.8 },
+            animate: { opacity: 1, scale: 1 },
+            exit: { opacity: 0, scale: 0.8 },
+            transition: { duration: 0.3 }
+          }}
+        >
+          <DialogTitle>Create New Group Buy</DialogTitle>
+          <DialogContent>
+            <Grid container spacing={2} sx={{ mt: 1 }}>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Product Name"
+                  value={newGroupBuy.productName}
+                  onChange={handleFieldChange('productName')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <FormControl fullWidth>
+                  <InputLabel>Category</InputLabel>
+                  <Select
+                    value={newGroupBuy.category}
+                    onChange={handleFieldChange('category')}
+                    label="Category"
+                  >
+                    {categories.map((cat) => (
+                      <MenuItem key={cat} value={cat}>{cat}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Target Quantity (kg)"
+                  type="number"
+                  value={newGroupBuy.targetQuantity}
+                  onChange={handleFieldChange('targetQuantity')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Current Price (₹/kg)"
+                  type="number"
+                  value={newGroupBuy.currentPrice}
+                  onChange={handleFieldChange('currentPrice')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Target Price (₹/kg)"
+                  type="number"
+                  value={newGroupBuy.targetPrice}
+                  onChange={handleFieldChange('targetPrice')}
+                />
+              </Grid>
+              <Grid item xs={12} md={6}>
+                <TextField
+                  fullWidth
+                  label="Deadline"
+                  type="datetime-local"
+                  value={newGroupBuy.deadline}
+                  onChange={handleFieldChange('deadline')}
+                  InputLabelProps={{ shrink: true }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Description"
+                  multiline
+                  rows={3}
+                  value={newGroupBuy.description}
+                  onChange={handleFieldChange('description')}
+                />
+              </Grid>
+            </Grid>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setCreateDialogOpen(false)} component={motion.button} whileTap={{ scale: 0.95 }}>Cancel</Button>
+            <Button onClick={handleCreateGroupBuy} variant="contained" component={motion.button} whileTap={{ scale: 0.95 }}>
+              Create Group Buy
+            </Button>
+          </DialogActions>
+        </Dialog>
+      )}
+    </AnimatePresence>
+  ), [createDialogOpen, newGroupBuy, categories, handleFieldChange]);
+
+  // Loading skeleton animation
+  const shimmerAnimation = {
+    initial: { x: '-100%' },
+    animate: { 
+      x: '100%',
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }
+    }
+  };
+
+  // Loading skeleton components
+  const LoadingSkeleton = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {[...Array(3)].map((_, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          style={{ marginBottom: 16 }}
+        >
+          <Card sx={{ 
+            '&:hover': { elevation: 4 },
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <CardContent>
+              {/* Header skeleton */}
+              <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                <Box flex={1}>
+                  <Box
+                    sx={{
+                      height: 28,
+                      width: '60%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '40%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: 80,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box textAlign="right">
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: 80,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: 60,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Location skeleton */}
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    bgcolor: 'grey.200',
+                    borderRadius: 0.5,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    height: 16,
+                    width: '50%',
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Description skeleton */}
+              <Box
+                sx={{
+                  height: 16,
+                  width: '100%',
+                  bgcolor: 'grey.200',
+                  borderRadius: 1,
+                  mb: 2,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
               >
-                {categories.map((cat) => (
-                  <MenuItem key={cat} value={cat}>{cat}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Target Quantity (kg)"
-              type="number"
-              value={newGroupBuy.targetQuantity}
-              onChange={(e) => setNewGroupBuy({ ...newGroupBuy, targetQuantity: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Current Price (₹/kg)"
-              type="number"
-              value={newGroupBuy.currentPrice}
-              onChange={(e) => setNewGroupBuy({ ...newGroupBuy, currentPrice: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Target Price (₹/kg)"
-              type="number"
-              value={newGroupBuy.targetPrice}
-              onChange={(e) => setNewGroupBuy({ ...newGroupBuy, targetPrice: e.target.value })}
-            />
-          </Grid>
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              label="Deadline"
-              type="datetime-local"
-              value={newGroupBuy.deadline}
-              onChange={(e) => setNewGroupBuy({ ...newGroupBuy, deadline: e.target.value })}
-              InputLabelProps={{ shrink: true }}
-            />
-          </Grid>
-          <Grid item xs={12}>
-            <TextField
-              fullWidth
-              label="Description"
-              multiline
-              rows={3}
-              value={newGroupBuy.description}
-              onChange={(e) => setNewGroupBuy({ ...newGroupBuy, description: e.target.value })}
-            />
-          </Grid>
-        </Grid>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={() => setCreateDialogOpen(false)}>Cancel</Button>
-        <Button onClick={handleCreateGroupBuy} variant="contained">
-          Create Group Buy
-        </Button>
-      </DialogActions>
-    </Dialog>
+                <motion.div
+                  variants={shimmerAnimation}
+                  initial="initial"
+                  animate="animate"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                  }}
+                />
+              </Box>
+
+              {/* Progress skeleton */}
+              <Box mb={2}>
+                <Box display="flex" justifyContent="space-between" alignItems="center" mb={1}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '40%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: 60,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box
+                  sx={{
+                    height: 8,
+                    width: '100%',
+                    bgcolor: 'grey.200',
+                    borderRadius: 4,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Price Grid skeleton */}
+              <Grid container spacing={2} mb={2}>
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '70%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: '50%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '70%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: '50%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {/* Participants skeleton */}
+              <Box display="flex" alignItems="center" justifyContent="space-between" mb={2}>
+                <Box display="flex" alignItems="center" gap={1}>
+                  <Box
+                    sx={{
+                      width: 16,
+                      height: 16,
+                      bgcolor: 'grey.200',
+                      borderRadius: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: 80,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box display="flex" gap={0.5}>
+                  {[...Array(4)].map((_, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        width: 24,
+                        height: 24,
+                        bgcolor: 'grey.200',
+                        borderRadius: '50%',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        variants={shimmerAnimation}
+                        initial="initial"
+                        animate="animate"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Action buttons skeleton */}
+              <Box display="flex" gap={1}>
+                <Box
+                  sx={{
+                    height: 36,
+                    flex: 1,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    height: 36,
+                    width: 100,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </motion.div>
   );
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
+      {showConfetti && <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={250} />}
       <Box display="flex" justifyContent="space-between" alignItems="center" mb={3}>
         <Box>
-          <Typography variant="h4" gutterBottom>
+          <Typography variant="h4" gutterBottom component={motion.h4} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7 }}>
             Group Buys
           </Typography>
-          <Typography variant="body1" color="text.secondary">
+          <Typography variant="body1" color="text.secondary" component={motion.p} initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.2 }}>
             Join bulk purchases to get better prices
           </Typography>
         </Box>
-        <Button
-          variant="contained"
-          startIcon={<Add />}
-          onClick={() => setCreateDialogOpen(true)}
+        <motion.div
+          initial={{ scale: 1 }}
+          animate={{ scale: [1, 1.08, 1] }}
+          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
         >
-          Create Group Buy
-        </Button>
+          <Button
+            variant="contained"
+            startIcon={<Add />}
+            onClick={() => setCreateDialogOpen(true)}
+            sx={{ boxShadow: 3 }}
+            component={motion.button}
+            whileHover={{ scale: 1.12 }}
+            whileTap={{ scale: 0.97 }}
+          >
+            Create Group Buy
+          </Button>
+        </motion.div>
       </Box>
 
       {/* Stats */}
       <Grid container spacing={2} mb={3}>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <Typography variant="h4" color="primary">
-              {groupBuys.filter(gb => gb.status === 'active').length}
+              <CountUp end={groupBuys.filter(gb => gb.status === 'active').length} duration={1.2} />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Active Group Buys
@@ -472,9 +1139,9 @@ const GroupBuys = () => {
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
             <Typography variant="h4" color="success.main">
-              ₹2,340
+              <CountUp end={2340} duration={1.2} prefix="₹" />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Total Savings
@@ -482,9 +1149,9 @@ const GroupBuys = () => {
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
             <Typography variant="h4" color="warning.main">
-              24
+              <CountUp end={24} duration={1.2} />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Joined Groups
@@ -492,9 +1159,9 @@ const GroupBuys = () => {
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
             <Typography variant="h4" color="info.main">
-              12
+              <CountUp end={12} duration={1.2} />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Completed
@@ -507,18 +1174,18 @@ const GroupBuys = () => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           {loading ? (
-            <Box textAlign="center" py={4}>
-              <Typography>Loading group buys...</Typography>
-            </Box>
+            <LoadingSkeleton />
           ) : (
-            groupBuys.map((groupBuy) => (
-              <GroupBuyCard key={groupBuy.id} groupBuy={groupBuy} />
-            ))
+            <AnimatePresence>
+              {groupBuys.map((groupBuy, idx) => (
+                <GroupBuyCard key={groupBuy.id} groupBuy={groupBuy} index={idx} />
+              ))}
+            </AnimatePresence>
           )}
         </Grid>
       </Grid>
 
-      <CreateDialog />
+      {MemoCreateDialog}
       <JoinDialog />
     </Container>
   );

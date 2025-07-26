@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import CountUp from 'react-countup';
+import Confetti from 'react-confetti';
 import {
   Container,
   Grid,
@@ -21,10 +23,14 @@ import {
   TrendingUp,
   Person,
 } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Bidding = () => {
   const [bids, setBids] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [showConfetti, setShowConfetti] = useState(false);
+  const [bidSuccess, setBidSuccess] = useState(false);
+  const [ripple, setRipple] = useState(false);
 
   useEffect(() => {
     loadBids();
@@ -96,8 +102,28 @@ const Bidding = () => {
     return 'warning.main';
   };
 
-  const BidCard = ({ bid }) => (
-    <Card sx={{ mb: 2, '&:hover': { elevation: 4 } }}>
+// Animation variants
+const cardVariants = {
+  hidden: { opacity: 0, y: 40, scale: 0.95 },
+  visible: { opacity: 1, y: 0, scale: 1, transition: { type: 'spring', stiffness: 120, damping: 18 } },
+  hover: { scale: 1.03, boxShadow: '0 8px 24px rgba(0,0,0,0.12)', transition: { duration: 0.2 } }
+};
+
+const BidCard = ({ bid, index }) => {
+  // Ripple and confetti only for active bids
+  const handlePlaceBid = () => {
+    setRipple(true);
+    setBidSuccess(true);
+    setShowConfetti(true);
+    setTimeout(() => setRipple(false), 400);
+    setTimeout(() => setShowConfetti(false), 1800);
+    setTimeout(() => setBidSuccess(false), 2000);
+  };
+  return (
+    <Card sx={{ mb: 2, cursor: 'pointer', boxShadow: 2, borderRadius: 3, transition: 'box-shadow 0.2s', position: 'relative', overflow: 'hidden' }}>
+      {bidSuccess && showConfetti && bid.status === 'active' && (
+        <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={180} />
+      )}
       <CardContent>
         <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
           <Box>
@@ -189,7 +215,7 @@ const Bidding = () => {
         <Divider sx={{ my: 2 }} />
 
         {bid.status === 'active' ? (
-          <Box display="flex" gap={1} alignItems="center">
+          <Box display="flex" gap={2} alignItems="center" position="relative">
             <TextField
               size="small"
               label="Your Bid (₹/kg)"
@@ -197,9 +223,32 @@ const Bidding = () => {
               sx={{ flex: 1 }}
               inputProps={{ min: bid.currentBid + 1 }}
             />
-            <Button variant="contained" size="small">
-              Place Bid
-            </Button>
+            <Box sx={{ display: 'flex', alignItems: 'center', position: 'relative', overflow: 'hidden', height: '100%' }}>
+              <Button
+                variant="contained"
+                size="medium"
+                onClick={handlePlaceBid}
+                sx={{ position: 'relative', zIndex: 1, minWidth: 110, height: 40, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+              >
+                Place Bid
+              </Button>
+              {ripple && (
+                <span
+                  style={{
+                    position: 'absolute',
+                    left: '50%',
+                    top: '50%',
+                    width: 48,
+                    height: 48,
+                    background: 'rgba(25, 118, 210, 0.25)',
+                    borderRadius: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    pointerEvents: 'none',
+                    zIndex: 0
+                  }}
+                />
+              )}
+            </Box>
           </Box>
         ) : (
           <Button variant="outlined" fullWidth disabled>
@@ -208,6 +257,574 @@ const Bidding = () => {
         )}
       </CardContent>
     </Card>
+  );
+};
+
+  // Loading skeleton animation
+  const shimmerAnimation = {
+    initial: { x: '-100%' },
+    animate: { 
+      x: '100%',
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }
+    }
+  };
+
+  // Loading skeleton components
+  const LoadingSkeleton = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {[...Array(3)].map((_, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          style={{ marginBottom: 16 }}
+        >
+          <Card sx={{ 
+            '&:hover': { elevation: 4 },
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <CardContent>
+              {/* Header skeleton */}
+              <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                <Box flex={1}>
+                  <Box
+                    sx={{
+                      height: 28,
+                      width: '60%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '40%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: 80,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box textAlign="right">
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: 60,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box display="flex" alignItems="center" gap={0.5}>
+                    <Box
+                      sx={{
+                        width: 16,
+                        height: 16,
+                        bgcolor: 'grey.200',
+                        borderRadius: 0.5,
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        variants={shimmerAnimation}
+                        initial="initial"
+                        animate="animate"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        }}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        height: 16,
+                        width: 50,
+                        bgcolor: 'grey.200',
+                        borderRadius: 1,
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        variants={shimmerAnimation}
+                        initial="initial"
+                        animate="animate"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Location skeleton */}
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    bgcolor: 'grey.200',
+                    borderRadius: 0.5,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    height: 16,
+                    width: '50%',
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Description skeleton */}
+              <Box
+                sx={{
+                  height: 16,
+                  width: '100%',
+                  bgcolor: 'grey.200',
+                  borderRadius: 1,
+                  mb: 2,
+                  position: 'relative',
+                  overflow: 'hidden'
+                }}
+              >
+                <motion.div
+                  variants={shimmerAnimation}
+                  initial="initial"
+                  animate="animate"
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                  }}
+                />
+              </Box>
+
+              {/* Price Grid skeleton */}
+              <Grid container spacing={2} mb={2}>
+                <Grid item xs={4}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '80%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 20,
+                      width: '60%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '80%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: '60%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={4}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '80%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 20,
+                      width: '40%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              {/* Bidders skeleton */}
+              <Box display="flex" alignItems="center" gap={1} mb={2}>
+                <Box
+                  sx={{
+                    width: 16,
+                    height: 16,
+                    bgcolor: 'grey.200',
+                    borderRadius: 0.5,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    height: 16,
+                    width: 80,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              {/* Winner skeleton (conditional) */}
+              <Box mb={2}>
+                <Box
+                  sx={{
+                    height: 24,
+                    width: 100,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Bidding form skeleton */}
+              <Box display="flex" gap={1} alignItems="center">
+                <Box
+                  sx={{
+                    height: 40,
+                    flex: 1,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    height: 40,
+                    width: 100,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </motion.div>
   );
 
   return (
@@ -222,9 +839,9 @@ const Bidding = () => {
       {/* Stats */}
       <Grid container spacing={2} mb={3}>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6 }}>
             <Typography variant="h4" color="success.main">
-              {bids.filter(b => b.status === 'active').length}
+              <CountUp end={bids.filter(b => b.status === 'active').length} duration={1.2} />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Live Auctions
@@ -232,9 +849,9 @@ const Bidding = () => {
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }}>
             <Typography variant="h4" color="primary">
-              3
+              <CountUp end={3} duration={1.2} />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Won Bids
@@ -242,9 +859,9 @@ const Bidding = () => {
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.2 }}>
             <Typography variant="h4" color="warning.main">
-              ₹1,250
+              <CountUp end={1250} duration={1.2} prefix="₹" />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Total Savings
@@ -252,9 +869,9 @@ const Bidding = () => {
           </Paper>
         </Grid>
         <Grid item xs={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center' }}>
+          <Paper sx={{ p: 2, textAlign: 'center' }} component={motion.div} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.3 }}>
             <Typography variant="h4" color="info.main">
-              85%
+              <CountUp end={85} duration={1.2} suffix="%" />
             </Typography>
             <Typography variant="body2" color="text.secondary">
               Win Rate
@@ -267,13 +884,13 @@ const Bidding = () => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           {loading ? (
-            <Box textAlign="center" py={4}>
-              <Typography>Loading auctions...</Typography>
-            </Box>
+            <LoadingSkeleton />
           ) : (
-            bids.map((bid) => (
-              <BidCard key={bid.id} bid={bid} />
-            ))
+            <AnimatePresence>
+              {bids.map((bid, idx) => (
+                <BidCard key={bid.id} bid={bid} index={idx} />
+              ))}
+            </AnimatePresence>
           )}
         </Grid>
       </Grid>

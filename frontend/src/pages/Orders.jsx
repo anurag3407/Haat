@@ -29,6 +29,8 @@ import {
   Receipt,
   Phone,
 } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useAuth } from '../contexts/AuthContext';
 
 const Orders = () => {
   const [orders, setOrders] = useState([]);
@@ -108,118 +110,127 @@ const Orders = () => {
   };
 
   const OrderCard = ({ order }) => (
-    <Card sx={{ mb: 2, '&:hover': { elevation: 4 } }}>
-      <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
-          <Box>
-            <Typography variant="h6" gutterBottom>
-              Order #{order.id}
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              {order.supplier}
-            </Typography>
-          </Box>
-          <Box textAlign="right">
-            <Chip
-              label={order.status.toUpperCase()}
-              color={getStatusColor(order.status)}
-              size="small"
-            />
-            <Typography variant="body2" color="text.secondary" mt={1}>
-              {order.orderDate}
-            </Typography>
-          </Box>
-        </Box>
-
-        {/* Order Items */}
-        <Box mb={2}>
-          {order.items.map((item, index) => (
-            <Box key={index} display="flex" justifyContent="space-between" py={1}>
-              <Typography variant="body2">
-                {item.name} ({item.quantity})
+    <motion.div
+      initial={{ opacity: 0, y: 40, scale: 0.97 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      whileHover={{ scale: 1.03, boxShadow: '0 8px 24px rgba(0,0,0,0.12)' }}
+      transition={{ type: 'spring', stiffness: 120, damping: 18 }}
+      style={{ marginBottom: 16 }}
+    >
+      <Card sx={{ mb: 0, cursor: 'pointer', boxShadow: 2, borderRadius: 3, transition: 'box-shadow 0.2s', position: 'relative', overflow: 'hidden' }}>
+        <CardContent>
+          {/* ...existing code for card content... */}
+          <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+            <Box>
+              <Typography variant="h6" gutterBottom>
+                Order #{order.id}
               </Typography>
-              <Typography variant="body2" fontWeight="bold">
-                {item.price}
+              <Typography variant="body2" color="text.secondary">
+                {order.supplier}
               </Typography>
             </Box>
-          ))}
-          <Divider />
-          <Box display="flex" justifyContent="space-between" py={1}>
-            <Typography variant="body1" fontWeight="bold">
-              Total Amount
-            </Typography>
-            <Typography variant="body1" fontWeight="bold" color="primary">
-              {order.totalAmount}
-            </Typography>
+            <Box textAlign="right">
+              <Chip
+                label={order.status.toUpperCase()}
+                color={getStatusColor(order.status)}
+                size="small"
+              />
+              <Typography variant="body2" color="text.secondary" mt={1}>
+                {order.orderDate}
+              </Typography>
+            </Box>
           </Box>
-        </Box>
 
-        {/* Order Status Stepper */}
-        <Box mb={2}>
-          <Typography variant="body2" color="text.secondary" mb={1}>
-            Order Status
-          </Typography>
-          <Stepper activeStep={order.currentStep} alternativeLabel>
-            {order.trackingSteps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
+          {/* Order Items */}
+          <Box mb={2}>
+            {order.items.map((item, index) => (
+              <Box key={index} display="flex" justifyContent="space-between" py={1}>
+                <Typography variant="body2">
+                  {item.name} ({item.quantity})
+                </Typography>
+                <Typography variant="body2" fontWeight="bold">
+                  {item.price}
+                </Typography>
+              </Box>
             ))}
-          </Stepper>
-        </Box>
+            <Divider />
+            <Box display="flex" justifyContent="space-between" py={1}>
+              <Typography variant="body1" fontWeight="bold">
+                Total Amount
+              </Typography>
+              <Typography variant="body1" fontWeight="bold" color="primary">
+                {order.totalAmount}
+              </Typography>
+            </Box>
+          </Box>
 
-        {/* Payment Info */}
-        <Grid container spacing={2} mb={2}>
-          <Grid item xs={6}>
-            <Typography variant="body2" color="text.secondary">
-              Payment Method
+          {/* Order Status Stepper */}
+          <Box mb={2}>
+            <Typography variant="body2" color="text.secondary" mb={1}>
+              Order Status
             </Typography>
-            <Typography variant="body2" fontWeight="bold">
-              {order.paymentMethod}
-            </Typography>
+            <Stepper activeStep={order.currentStep} alternativeLabel>
+              {order.trackingSteps.map((label) => (
+                <Step key={label}>
+                  <StepLabel>{label}</StepLabel>
+                </Step>
+              ))}
+            </Stepper>
+          </Box>
+
+          {/* Payment Info */}
+          <Grid container spacing={2} mb={2}>
+            <Grid item xs={6}>
+              <Typography variant="body2" color="text.secondary">
+                Payment Method
+              </Typography>
+              <Typography variant="body2" fontWeight="bold">
+                {order.paymentMethod}
+              </Typography>
+            </Grid>
+            <Grid item xs={6}>
+              <Typography variant="body2" color="text.secondary">
+                Payment Status
+              </Typography>
+              <Chip
+                label={order.paymentStatus.toUpperCase()}
+                size="small"
+                color={order.paymentStatus === 'paid' ? 'success' : 'warning'}
+              />
+            </Grid>
           </Grid>
-          <Grid item xs={6}>
-            <Typography variant="body2" color="text.secondary">
-              Payment Status
-            </Typography>
-            <Chip
-              label={order.paymentStatus.toUpperCase()}
-              size="small"
-              color={order.paymentStatus === 'paid' ? 'success' : 'warning'}
-            />
-          </Grid>
-        </Grid>
 
-        <Divider sx={{ my: 2 }} />
+          <Divider sx={{ my: 2 }} />
 
-        {/* Actions */}
-        <Box display="flex" gap={1}>
-          {order.status === 'delivered' && (
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => {
-                setSelectedOrder(order);
-                setFeedbackDialog(true);
-              }}
-            >
-              Rate & Review
+          {/* Actions */}
+          <Box display="flex" gap={1}>
+            {order.status === 'delivered' && (
+              <Button
+                variant="outlined"
+                size="small"
+                onClick={() => {
+                  setSelectedOrder(order);
+                  setFeedbackDialog(true);
+                }}
+              >
+                Rate & Review
+              </Button>
+            )}
+            <Button variant="outlined" size="small">
+              View Details
             </Button>
-          )}
-          <Button variant="outlined" size="small">
-            View Details
-          </Button>
-          <Button variant="outlined" size="small">
-            Download Invoice
-          </Button>
-          {order.status !== 'delivered' && order.status !== 'cancelled' && (
-            <Button variant="outlined" size="small" color="error">
-              Cancel Order
+            <Button variant="outlined" size="small">
+              Download Invoice
             </Button>
-          )}
-        </Box>
-      </CardContent>
-    </Card>
+            {order.status !== 'delivered' && order.status !== 'cancelled' && (
+              <Button variant="outlined" size="small" color="error">
+                Cancel Order
+              </Button>
+            )}
+          </Box>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 
   const FeedbackDialog = () => {
@@ -228,8 +239,10 @@ const Orders = () => {
 
     return (
       <Dialog open={feedbackDialog} onClose={() => setFeedbackDialog(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>Rate & Review Order</DialogTitle>
-        <DialogContent>
+        <DialogTitle component={motion.div} initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+          Rate & Review Order
+        </DialogTitle>
+        <DialogContent component={motion.div} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5 }}>
           <Box mb={2}>
             <Typography variant="body1" mb={1}>
               Order #{selectedOrder?.id}
@@ -238,29 +251,31 @@ const Orders = () => {
               {selectedOrder?.supplier}
             </Typography>
           </Box>
-          
           <Box mb={2}>
             <Typography variant="body2" mb={1}>
               Your Rating
             </Typography>
-            <Rating
-              value={rating}
-              onChange={(event, newValue) => setRating(newValue)}
-              size="large"
-            />
+            <motion.div initial={{ scale: 0.9, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}>
+              <Rating
+                value={rating}
+                onChange={(event, newValue) => setRating(newValue)}
+                size="large"
+              />
+            </motion.div>
           </Box>
-          
-          <TextField
-            fullWidth
-            label="Your Review"
-            multiline
-            rows={4}
-            value={review}
-            onChange={(e) => setReview(e.target.value)}
-            placeholder="Share your experience with this order..."
-          />
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+            <TextField
+              fullWidth
+              label="Your Review"
+              multiline
+              rows={4}
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder="Share your experience with this order..."
+            />
+          </motion.div>
         </DialogContent>
-        <DialogActions>
+        <DialogActions component={motion.div} initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
           <Button onClick={() => setFeedbackDialog(false)}>Cancel</Button>
           <Button variant="contained" disabled={rating === 0}>
             Submit Review
@@ -269,6 +284,477 @@ const Orders = () => {
       </Dialog>
     );
   };
+
+  // Loading skeleton animation
+  const shimmerAnimation = {
+    initial: { x: '-100%' },
+    animate: { 
+      x: '100%',
+      transition: {
+        duration: 1.5,
+        repeat: Infinity,
+        ease: 'easeInOut'
+      }
+    }
+  };
+
+  // Loading skeleton components
+  const LoadingSkeleton = () => (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.5 }}
+    >
+      {[...Array(3)].map((_, index) => (
+        <motion.div
+          key={index}
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: index * 0.1 }}
+          style={{ marginBottom: 16 }}
+        >
+          <Card sx={{ 
+            '&:hover': { elevation: 4 },
+            position: 'relative',
+            overflow: 'hidden'
+          }}>
+            <CardContent>
+              {/* Header skeleton */}
+              <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={2}>
+                <Box flex={1}>
+                  <Box
+                    sx={{
+                      height: 28,
+                      width: '40%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '60%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+                <Box textAlign="right">
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: 80,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: 60,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Order Items skeleton */}
+              <Box mb={2}>
+                {[...Array(2)].map((_, i) => (
+                  <Box key={i} display="flex" justifyContent="space-between" py={1}>
+                    <Box
+                      sx={{
+                        height: 16,
+                        width: '50%',
+                        bgcolor: 'grey.200',
+                        borderRadius: 1,
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        variants={shimmerAnimation}
+                        initial="initial"
+                        animate="animate"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        }}
+                      />
+                    </Box>
+                    <Box
+                      sx={{
+                        height: 16,
+                        width: 60,
+                        bgcolor: 'grey.200',
+                        borderRadius: 1,
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        variants={shimmerAnimation}
+                        initial="initial"
+                        animate="animate"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        }}
+                      />
+                    </Box>
+                  </Box>
+                ))}
+                <Divider sx={{ my: 1 }} />
+                <Box display="flex" justifyContent="space-between" py={1}>
+                  <Box
+                    sx={{
+                      height: 20,
+                      width: '30%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 20,
+                      width: 80,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Box>
+              </Box>
+
+              {/* Order Status Stepper skeleton */}
+              <Box mb={2}>
+                <Box
+                  sx={{
+                    height: 16,
+                    width: '30%',
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    mb: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box display="flex" justifyContent="space-between" mb={1}>
+                  {[...Array(4)].map((_, i) => (
+                    <Box
+                      key={i}
+                      sx={{
+                        width: 60,
+                        height: 40,
+                        bgcolor: 'grey.200',
+                        borderRadius: 1,
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                    >
+                      <motion.div
+                        variants={shimmerAnimation}
+                        initial="initial"
+                        animate="animate"
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          bottom: 0,
+                          background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                        }}
+                      />
+                    </Box>
+                  ))}
+                </Box>
+              </Box>
+
+              {/* Payment Info skeleton */}
+              <Grid container spacing={2} mb={2}>
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '70%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 20,
+                      width: '50%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+                <Grid item xs={6}>
+                  <Box
+                    sx={{
+                      height: 16,
+                      width: '70%',
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      mb: 0.5,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                  <Box
+                    sx={{
+                      height: 24,
+                      width: 60,
+                      bgcolor: 'grey.200',
+                      borderRadius: 1,
+                      position: 'relative',
+                      overflow: 'hidden'
+                    }}
+                  >
+                    <motion.div
+                      variants={shimmerAnimation}
+                      initial="initial"
+                      animate="animate"
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                      }}
+                    />
+                  </Box>
+                </Grid>
+              </Grid>
+
+              <Divider sx={{ my: 2 }} />
+
+              {/* Actions skeleton */}
+              <Box display="flex" gap={1}>
+                <Box
+                  sx={{
+                    height: 32,
+                    width: 120,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+                <Box
+                  sx={{
+                    height: 32,
+                    width: 100,
+                    bgcolor: 'grey.200',
+                    borderRadius: 1,
+                    position: 'relative',
+                    overflow: 'hidden'
+                  }}
+                >
+                  <motion.div
+                    variants={shimmerAnimation}
+                    initial="initial"
+                    animate="animate"
+                    style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent)',
+                    }}
+                  />
+                </Box>
+              </Box>
+            </CardContent>
+          </Card>
+        </motion.div>
+      ))}
+    </motion.div>
+  );
 
   return (
     <Container maxWidth="lg" sx={{ mt: 2 }}>
@@ -327,9 +813,7 @@ const Orders = () => {
       <Grid container spacing={2}>
         <Grid item xs={12}>
           {loading ? (
-            <Box textAlign="center" py={4}>
-              <Typography>Loading orders...</Typography>
-            </Box>
+            <LoadingSkeleton />
           ) : (
             orders.map((order) => (
               <OrderCard key={order.id} order={order} />

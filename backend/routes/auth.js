@@ -96,10 +96,16 @@ router.post('/register', async (req, res) => {
     
   } catch (error) {
     console.error('Registration error:', error);
+    // Log error stack for more details
+    if (error.stack) {
+      console.error('Error stack:', error.stack);
+    }
     if (error.code === 11000) {
       return res.status(400).json({ message: 'Email or phone number already registered' });
     }
-    res.status(500).json({ message: 'Server error during registration' });
+    // Send error details in response for debugging (remove in production)
+    res.status(500).json({ message: 'Server error during registration', error: error.message, details: error.stack });
+    console.log('JWT_SECRET:', process.env.JWT_SECRET);
   }
 });
 
