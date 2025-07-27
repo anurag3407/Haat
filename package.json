@@ -4,9 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" --names \"backend,frontend\" --prefix-colors \"yellow,blue\" --kill-others-on-fail",
+    "dev:frontend": "vite",
     "dev:backend": "cd backend && npm run dev",
-    "dev:both": "concurrently \"npm run dev:backend\" \"npm run dev\" --names \"backend,frontend\" --prefix-colors \"yellow,blue\"",
+    "dev:both": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\" --names \"backend,frontend\" --prefix-colors \"yellow,blue\"",
     "dev:full": "node start-development.cjs",
     "dev:populate": "cd backend && node populate-database-complete.js && cd .. && npm run dev:both",
     "build": "vite build",
