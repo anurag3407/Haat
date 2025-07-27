@@ -136,7 +136,7 @@ const Textarea = styled.textarea`
 `;
 
 const ErrorMessage = styled.span`
-  color: #dc3545;
+  color: ${({ theme }) => theme.colors.error};
   font-size: ${({ theme }) => theme.fontSize.sm};
   font-weight: 500;
 `;
@@ -219,38 +219,54 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
+    // Name validation
     if (!formData.name.trim()) {
       newErrors.name = 'Name is required';
+    } else if (formData.name.trim().length < 2) {
+      newErrors.name = 'Name must be at least 2 characters';
     }
 
+    // Email validation
     if (!formData.email.trim()) {
       newErrors.email = 'Email is required';
-    } else if (!/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(formData.email)) {
-      newErrors.email = 'Invalid email format';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      newErrors.email = 'Please enter a valid email address';
     }
 
+    // Phone validation
     if (!formData.phone.trim()) {
       newErrors.phone = 'Phone number is required';
+    } else if (!/^[\+]?[1-9][\d]{0,15}$/.test(formData.phone.replace(/[\s\-\(\)]/g, ''))) {
+      newErrors.phone = 'Please enter a valid phone number';
     }
 
+    // Password validation
     if (!formData.password) {
       newErrors.password = 'Password is required';
     } else if (formData.password.length < 6) {
       newErrors.password = 'Password must be at least 6 characters';
     }
 
-    if (formData.password !== formData.confirmPassword) {
+    // Confirm password validation
+    if (!formData.confirmPassword) {
+      newErrors.confirmPassword = 'Please confirm your password';
+    } else if (formData.password !== formData.confirmPassword) {
       newErrors.confirmPassword = 'Passwords do not match';
     }
 
+    // Role validation
     if (!formData.role) {
       newErrors.role = 'Please select your role';
     }
 
+    // Business name validation
     if (!formData.businessName.trim()) {
       newErrors.businessName = 'Business name is required';
+    } else if (formData.businessName.trim().length < 2) {
+      newErrors.businessName = 'Business name must be at least 2 characters';
     }
 
+    // Business category validation
     if (!formData.businessCategory) {
       newErrors.businessCategory = 'Business category is required';
     }
@@ -271,22 +287,29 @@ const Register = () => {
 
     try {
       const registrationData = {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
+        name: formData.name.trim(),
+        email: formData.email.trim().toLowerCase(),
+        phone: formData.phone.trim(),
         password: formData.password,
         role: formData.role,
         businessInfo: {
-          name: formData.businessName,
+          name: formData.businessName.trim(),
           category: formData.businessCategory,
-          description: formData.businessDescription,
-          address: formData.address
+          description: formData.businessDescription.trim() || '',
+          address: formData.address.trim() || ''
         }
       };
 
-      await registerUser(registrationData);
-      toast.success('Registration successful! Welcome to VendorHub!');
-      navigate('/dashboard');
+      console.log('Registration data:', registrationData); // Debug log
+      
+      const result = await registerUser(registrationData);
+      
+      if (result.success) {
+        toast.success('Registration successful! Welcome to Haat!');
+        navigate('/dashboard');
+      } else {
+        throw new Error(result.error || 'Registration failed');
+      }
     } catch (error) {
       console.error('Registration error:', error);
       toast.error(error.message || 'Registration failed. Please try again.');

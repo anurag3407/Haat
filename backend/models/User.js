@@ -47,12 +47,16 @@ const userSchema = new mongoose.Schema({
   location: {
     type: {
       type: String,
-      enum: ['Point'],
-      default: 'Point'
+      enum: ['Point']
     },
     coordinates: {
       type: [Number], // [longitude, latitude]
-      required: false
+      validate: {
+        validator: function(coords) {
+          return coords && coords.length === 2;
+        },
+        message: 'Coordinates must be an array of 2 numbers [longitude, latitude]'
+      }
     },
     address: {
       type: String,
@@ -147,7 +151,6 @@ const userSchema = new mongoose.Schema({
 userSchema.index({ "location": "2dsphere" });
 
 // Indexes for performance
-userSchema.index({ email: 1 });
 userSchema.index({ role: 1 });
 userSchema.index({ isActive: 1 });
 userSchema.index({ civilScore: -1 });
@@ -170,6 +173,15 @@ userSchema.pre('save', async function(next) {
   } catch (error) {
     next(error);
   }
+});
+
+// Handle location field before saving
+userSchema.pre('save', function(next) {
+  // If location exists but has no coordinates, remove it
+  if (this.location && (!this.location.coordinates || this.location.coordinates.length !== 2)) {
+    this.location = undefined;
+  }
+  next();
 });
 
 // Compare password method

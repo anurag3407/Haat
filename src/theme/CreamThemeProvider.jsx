@@ -3,27 +3,29 @@ import { createGlobalStyle, ThemeProvider } from 'styled-components';
 
 export const theme = {
   colors: {
-    background: '#FFF4E6',
-    primary: '#FFE5B4',
-    secondary: '#FFDAB9',
-    accent: '#DCC6A0',
-    surface: '#F9F6F1',
-    text: '#2C1810', // Much darker for better contrast
-    textLight: '#4A3426', // Darker than before
-    textMuted: '#6B4E37', // Darker brown for better readability
+    background: '#F7F4EC', // Soft Ivory Cream - Main body/sections
+    primary: '#87AFC7', // Dusty Blue - Interactive elements, subtle highlights
+    secondary: '#6C7B8B', // Slate Gray - Subheadings, links, buttons
+    accent: '#87AFC7', // Dusty Blue - Interactive elements
+    surface: '#F7F4EC', // Soft Ivory Cream for cards and surfaces
+    text: '#36454F', // Charcoal Gray - Primary text color
+    textLight: '#6C7B8B', // Slate Gray - Secondary text
+    textMuted: '#6C7B8B', // Slate Gray - Muted text
+    footer: '#2F4F4F', // Dark Slate Gray - Footer background
     success: '#4CAF50',
     warning: '#F59E42',
     error: '#F44336',
-    info: '#2196F3',
+    info: '#87AFC7', // Using dusty blue for info
     white: '#FFFFFF',
     black: '#000000',
-    overlay: 'rgba(44, 24, 16, 0.4)', // Updated to match new text color
+    overlay: 'rgba(54, 69, 79, 0.4)', // Updated to match new text color
   },
   gradients: {
-    primary: 'linear-gradient(135deg, #FFF4E6 0%, #FFE5B4 50%, #FFDAB9 100%)',
-    secondary: 'linear-gradient(135deg, #F9F6F1 0%, #DCC6A0 100%)',
-    card: 'linear-gradient(145deg, #FFFFFF 0%, #F9F6F1 100%)',
-    glass: 'linear-gradient(145deg, rgba(255, 244, 230, 0.9) 0%, rgba(249, 246, 241, 0.7) 100%)',
+    primary: 'linear-gradient(135deg, #F7F4EC 0%, #87AFC7 50%, #F7F4EC 100%)',
+    secondary: 'linear-gradient(135deg, #F7F4EC 0%, #6C7B8B 100%)',
+    card: 'linear-gradient(145deg, #FFFFFF 0%, #F7F4EC 100%)',
+    glass: 'linear-gradient(145deg, rgba(247, 244, 236, 0.9) 0%, rgba(247, 244, 236, 0.7) 100%)',
+    footer: 'linear-gradient(135deg, #2F4F4F 0%, #36454F 100%)',
   },
   borderRadius: {
     small: '8px',
@@ -33,11 +35,11 @@ export const theme = {
     round: '50%',
   },
   shadows: {
-    soft: '0 4px 20px 0 rgba(220, 198, 160, 0.15)',
-    medium: '0 8px 32px 0 rgba(220, 198, 160, 0.18)',
-    large: '0 12px 40px 0 rgba(220, 198, 160, 0.22)',
-    glow: '0 0 20px rgba(255, 229, 180, 0.4)',
-    inner: 'inset 0 2px 4px 0 rgba(220, 198, 160, 0.1)',
+    soft: '0 4px 20px 0 rgba(135, 175, 199, 0.15)',
+    medium: '0 8px 32px 0 rgba(135, 175, 199, 0.18)',
+    large: '0 12px 40px 0 rgba(135, 175, 199, 0.22)',
+    glow: '0 0 20px rgba(135, 175, 199, 0.4)',
+    inner: 'inset 0 2px 4px 0 rgba(108, 123, 139, 0.1)',
   },
   fontFamily: {
     primary: "'Poppins', 'Inter', system-ui, -apple-system, sans-serif",
@@ -115,7 +117,7 @@ export const GlobalStyle = createGlobalStyle`
   }
 
   body {
-    background: ${({ theme }) => theme.gradients.primary};
+    background: ${({ theme }) => theme.colors.background};
     color: ${({ theme }) => theme.colors.text};
     font-family: ${({ theme }) => theme.fontFamily.primary};
     font-weight: ${({ theme }) => theme.fontWeight.normal};
@@ -258,7 +260,7 @@ export const GlobalStyle = createGlobalStyle`
     background: ${({ theme }) => theme.gradients.glass};
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(135, 175, 199, 0.2);
   }
 
   .text-gradient {

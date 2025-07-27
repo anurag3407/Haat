@@ -3,6 +3,8 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useDashboardStats, useLiveOrders, useRealTimeStatus, useRefreshData } from '../services/realTimeData';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const DashboardContainer = styled.div`
   min-height: calc(100vh - 80px);
@@ -29,6 +31,28 @@ const WelcomeTitle = styled.h1`
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ theme }) => theme.colors.text};
   margin-bottom: ${({ theme }) => theme.spacing.md};
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const RefreshButton = styled(motion.button)`
+  background: ${({ theme }) => theme.colors.accent};
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 1.2em;
+  transition: ${({ theme }) => theme.transitions.normal};
+
+  &:hover {
+    background: ${({ theme }) => theme.colors.secondary};
+  }
 `;
 
 const WelcomeText = styled.p`
@@ -177,6 +201,21 @@ const SectionTitle = styled.h2`
 
 const Dashboard = () => {
   const { user } = useAuth();
+  
+  // Real-time data hooks
+  const { data: dashboardStats, isLoading: statsLoading, error: statsError } = useDashboardStats();
+  const { data: liveOrders, isLoading: ordersLoading } = useLiveOrders();
+  const realTimeStatus = useRealTimeStatus();
+  const { refreshDashboard } = useRefreshData();
+
+  // Handle loading and error states
+  if (statsLoading) {
+    return <LoadingSpinner fullScreen />;
+  }
+
+  if (statsError) {
+    console.error('Dashboard stats error:', statsError);
+  }
 
   const vendorActions = [
     {
@@ -207,6 +246,14 @@ const Dashboard = () => {
 
   const actions = vendorActions;
 
+  // Default stats if API data is not available
+  const stats = dashboardStats?.stats || {
+    totalOrders: liveOrders?.orders?.length || 0,
+    activeGroupBuys: 0,
+    civilScore: user?.civilScore || 500,
+    monthlySpent: 0
+  };
+
   return (
     <DashboardContainer>
       <DashboardContent>
@@ -215,7 +262,17 @@ const Dashboard = () => {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <WelcomeTitle>Welcome back, {user?.name || 'User'}!</WelcomeTitle>
+          <WelcomeTitle>
+            Welcome back, {user?.name || 'User'}!
+            <RefreshButton 
+              onClick={refreshDashboard}
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              title="Refresh data"
+            >
+              🔄
+            </RefreshButton>
+          </WelcomeTitle>
           <WelcomeText>
             Here's what's happening with your business today.
           </WelcomeText>
@@ -237,8 +294,15 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <StatValue>24</StatValue>
-            <StatLabel>Active Orders</StatLabel>
+            <StatValue>{stats.totalOrders}</StatValue>
+            <StatLabel>
+              {ordersLoading ? 'Loading...' : 'Total Orders'}
+              {realTimeStatus.ordersStatus.lastUpdate && (
+                <span style={{ fontSize: '0.8em', opacity: 0.7 }}>
+                  {' '}(Live)
+                </span>
+              )}
+            </StatLabel>
           </StatCard>
 
           <StatCard
@@ -246,8 +310,8 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <StatValue>₹12,450</StatValue>
-            <StatLabel>This Month's Sales</StatLabel>
+            <StatValue>₹{stats.monthlySpent?.toLocaleString() || '0'}</StatValue>
+            <StatLabel>This Month's Activity</StatLabel>
           </StatCard>
 
           <StatCard
@@ -255,8 +319,8 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <StatValue>4.8</StatValue>
-            <StatLabel>Average Rating</StatLabel>
+            <StatValue>{stats.activeGroupBuys || 0}</StatValue>
+            <StatLabel>Active Group Buys</StatLabel>
           </StatCard>
 
           <StatCard
@@ -264,8 +328,15 @@ const Dashboard = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.4 }}
           >
-            <StatValue>850</StatValue>
-            <StatLabel>Civil Score</StatLabel>
+            <StatValue>{stats.civilScore || user?.civilScore || 500}</StatValue>
+            <StatLabel>
+              Civil Score
+              {realTimeStatus.isHealthy() && (
+                <span style={{ fontSize: '0.8em', color: '#4CAF50' }}>
+                  {' '}●
+                </span>
+              )}
+            </StatLabel>
           </StatCard>
         </StatsGrid>
 

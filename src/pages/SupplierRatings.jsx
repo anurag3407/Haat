@@ -115,7 +115,7 @@ const StarsContainer = styled.div`
 `;
 
 const Star = styled.span`
-  color: ${({ filled }) => filled ? '#F59E0B' : '#D1D5DB'};
+  color: ${({ filled, theme }) => filled ? theme.colors.warning : theme.colors.textMuted};
   font-size: 18px;
 `;
 

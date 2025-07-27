@@ -128,8 +128,7 @@ const orderSchema = new mongoose.Schema({
       state: String,
       zipCode: String,
       coordinates: {
-        type: [Number], // [longitude, latitude]
-        index: '2dsphere'
+        type: [Number] // [longitude, latitude]
       }
     },
     preferredTime: {
@@ -325,7 +324,6 @@ const orderSchema = new mongoose.Schema({
 // Indexes for performance
 orderSchema.index({ vendor: 1, status: 1 });
 orderSchema.index({ supplier: 1, status: 1 });
-orderSchema.index({ orderNumber: 1 });
 orderSchema.index({ type: 1, status: 1 });
 orderSchema.index({ category: 1 });
 orderSchema.index({ createdAt: -1 });

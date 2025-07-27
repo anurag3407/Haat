@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import toast from 'react-hot-toast';
 
 // API base URL
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Auth Context
 const AuthContext = createContext({});
@@ -84,15 +84,29 @@ const apiCall = async (endpoint, options = {}) => {
 
   try {
     const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-    const data = await response.json();
+    
+    // Handle non-JSON responses gracefully
+    let data;
+    const contentType = response.headers.get('content-type');
+    if (contentType && contentType.includes('application/json')) {
+      data = await response.json();
+    } else {
+      data = { message: await response.text() };
+    }
 
     if (!response.ok) {
-      throw new Error(data.message || 'Something went wrong');
+      throw new Error(data.message || `HTTP ${response.status}: ${response.statusText}`);
     }
 
     return data;
   } catch (error) {
     console.error('API call error:', error);
+    
+    // Handle network errors
+    if (error.name === 'TypeError' && error.message.includes('fetch')) {
+      throw new Error('Network error. Please check your connection and try again.');
+    }
+    
     throw error;
   }
 };
@@ -147,12 +161,17 @@ export default function AuthProvider({ children }) {
   const saveAuthData = (user, tokens) => {
     localStorage.setItem('auth_user', JSON.stringify(user));
     localStorage.setItem('auth_tokens', JSON.stringify(tokens));
+    // Also store the access token for API service compatibility
+    localStorage.setItem('authToken', tokens.accessToken);
+    localStorage.setItem('refreshToken', tokens.refreshToken);
   };
 
   // Helper function to clear auth data
   const clearAuthData = () => {
     localStorage.removeItem('auth_user');
     localStorage.removeItem('auth_tokens');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('refreshToken');
   };
 
   // Login function
@@ -192,10 +211,14 @@ export default function AuthProvider({ children }) {
     dispatch({ type: 'LOGIN_START' });
 
     try {
+      console.log('Sending registration data:', userData); // Debug log
+      
       const data = await apiCall('/auth/register', {
         method: 'POST',
         body: JSON.stringify(userData),
       });
+
+      console.log('Registration response:', data); // Debug log
 
       // Handle both token formats for compatibility
       const { user, tokens, token } = data;
@@ -207,15 +230,31 @@ export default function AuthProvider({ children }) {
         payload: { user, tokens: authTokens },
       });
 
-      toast.success(`Welcome to VendorHub, ${user.name}!`);
+      toast.success(`Welcome to Haat, ${user.name}!`);
       return { success: true, data };
     } catch (error) {
+      console.error('Registration error details:', error); // Enhanced debug log
+      
       dispatch({
         type: 'LOGIN_ERROR',
         payload: error.message,
       });
-      toast.error(error.message || 'Registration failed');
-      return { success: false, error: error.message };
+
+      // Handle specific error types
+      let errorMessage = 'Registration failed. Please try again.';
+      
+      if (error.message.includes('User already exists')) {
+        errorMessage = 'An account with this email or phone number already exists.';
+      } else if (error.message.includes('Validation')) {
+        errorMessage = 'Please check your information and try again.';
+      } else if (error.message.includes('Network error')) {
+        errorMessage = 'Network error. Please check your internet connection.';
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
+      toast.error(errorMessage);
+      return { success: false, error: errorMessage };
     }
   };
 

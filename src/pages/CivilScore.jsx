@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 import { motion } from 'framer-motion';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -92,10 +92,10 @@ const ScoreLabel = styled.div`
 const ScoreLevel = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xl};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
-  color: ${({ score }) => {
-    if (score >= 750) return '#10B981'; // Green
-    if (score >= 650) return '#F59E0B'; // Yellow
-    return '#EF4444'; // Red
+  color: ${({ score, theme }) => {
+    if (score >= 750) return theme.colors.success; // Green
+    if (score >= 650) return theme.colors.warning; // Yellow
+    return theme.colors.error; // Red
   }};
   margin-bottom: ${({ theme }) => theme.spacing.sm};
 `;
@@ -132,9 +132,9 @@ const FactorScore = styled.div`
   font-size: ${({ theme }) => theme.fontSize.xl};
   font-weight: ${({ theme }) => theme.fontWeight.bold};
   color: ${({ score, theme }) => {
-    if (score >= 80) return '#10B981';
-    if (score >= 60) return '#F59E0B';
-    return '#EF4444';
+    if (score >= 80) return theme.colors.success;
+    if (score >= 60) return theme.colors.warning;
+    return theme.colors.error;
   }};
 `;
 
@@ -148,17 +148,17 @@ const FactorDescription = styled.p`
 const ProgressBar = styled.div`
   width: 100%;
   height: 8px;
-  background: rgba(220, 198, 160, 0.3);
+  background: rgba(108, 123, 139, 0.3);
   border-radius: ${({ theme }) => theme.borderRadius.small};
   overflow: hidden;
 `;
 
 const ProgressFill = styled(motion.div)`
   height: 100%;
-  background: ${({ score }) => {
-    if (score >= 80) return '#10B981';
-    if (score >= 60) return '#F59E0B';
-    return '#EF4444';
+  background: ${({ score, theme }) => {
+    if (score >= 80) return theme.colors.success;
+    if (score >= 60) return theme.colors.warning;
+    return theme.colors.error;
   }};
   border-radius: ${({ theme }) => theme.borderRadius.small};
 `;
@@ -200,6 +200,7 @@ const TipText = styled.p`
 
 const CivilScore = () => {
   const { user } = useAuth();
+  const theme = useTheme();
   const [score, setScore] = useState(0);
   const [animatedScore, setAnimatedScore] = useState(0);
 
@@ -321,7 +322,7 @@ const CivilScore = () => {
             </ScoreText>
           </ScoreDisplay>
 
-          <p style={{ color: '#4A3426', fontSize: '16px', lineHeight: '1.5' }}>
+          <p style={{ color: theme.colors.textLight, fontSize: '16px', lineHeight: '1.5' }}>
             Your Civil Score reflects your creditworthiness and reliability as a business partner in the vendor community.
           </p>
         </ScoreCard>
@@ -353,7 +354,7 @@ const CivilScore = () => {
               <div style={{ 
                 marginTop: '8px', 
                 fontSize: '14px', 
-                color: '#6B4E37',
+                color: theme.colors.textMuted,
                 textAlign: 'right'
               }}>
                 Weight: {factor.weight}

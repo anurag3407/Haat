@@ -22,11 +22,21 @@ const limiter = rateLimit({
 app.use('/api/', limiter);
 
 // CORS configuration
+// CORS configuration
+const allowedOrigins = process.env.NODE_ENV === 'production' 
+  ? [
+      // Add your Netlify URL here when deployed
+      process.env.FRONTEND_URL || 'https://your-netlify-app.netlify.app',
+      // Add custom domain if you have one
+      ...(process.env.CUSTOM_DOMAIN ? [process.env.CUSTOM_DOMAIN] : [])
+    ]
+  : ['http://localhost:5173', 'http://localhost:3000'];
+
 app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? ['https://your-netlify-app.netlify.app', 'https://your-vercel-app.vercel.app']
-    : ['http://localhost:5173', 'http://localhost:3000'],
-  credentials: true
+  origin: allowedOrigins,
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 // Body parsing middleware
@@ -37,10 +47,7 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 app.use(morgan('combined'));
 
 // MongoDB connection
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vendor-supply-management', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/vendor-supply-management')
 .then(() => console.log('✅ Connected to MongoDB Atlas'))
 .catch((err) => {
   console.error('❌ MongoDB connection error:', err);
@@ -57,6 +64,7 @@ app.use('/api/orders', require('./routes/orders'));
 app.use('/api/reviews', require('./routes/reviews'));
 app.use('/api/geo', require('./routes/geo'));
 app.use('/api/community', require('./routes/community'));
+app.use('/api/community', require('./routes/news')); // News routes under community
 
 // Health check endpoint
 app.get('/api/health', (req, res) => {
